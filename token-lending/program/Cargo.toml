@@ -19,6 +19,7 @@ num-traits = "0.2"
 serum_dex = { git = "https://github.com/project-serum/serum-dex", rev = "991a86e", features = ["no-entrypoint"] }
 solana-program = "1.5.1"
 spl-token = { path = "../../token/program", features = [ "no-entrypoint" ] }
+spl-token-swap = { version = "0.1.0", path = "../../token-swap/program", features = [ "no-entrypoint" ] }
 thiserror = "1.0"
 uint = "0.8"
 
