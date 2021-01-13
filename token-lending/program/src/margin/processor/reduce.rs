@@ -5,16 +5,9 @@ use crate::{
 };
 
 use solana_program::{
-    account_info::{next_account_info, AccountInfo},
-    decode_error::DecodeError,
+    account_info::{AccountInfo},
     entrypoint::ProgramResult,
-    msg,
-    program::{invoke, invoke_signed},
-    program_error::{PrintProgramError, ProgramError},
-    program_option::COption,
-    program_pack::{IsInitialized, Pack},
     pubkey::Pubkey,
-    sysvar::{clock::Clock, rent::Rent, Sysvar},
 };
 
 use num_traits::FromPrimitive;
@@ -32,6 +25,8 @@ pub fn process_reduce_position(
     if amount == 0 {
         return Err(LendingError::InvalidAmount.into());
     }
+
+    unimplemented!();
 
     Ok(())
 }

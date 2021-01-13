@@ -14,6 +14,14 @@ construct_uint! {
     pub struct U192(3);
 }
 
+pub fn pack_decimal(decimal: Decimal, dst: &mut [u8; 16]) {
+    *dst = decimal.to_scaled_val().to_le_bytes();
+}
+
+pub fn unpack_decimal(src: &[u8; 16]) -> Decimal {
+    Decimal::from_scaled_val(u128::from_le_bytes(*src))
+}
+
 /// Large decimal value precise to 18 digits
 #[derive(Clone, Copy, Debug, Default, PartialEq, PartialOrd, Eq, Ord)]
 pub struct Decimal(pub U192);

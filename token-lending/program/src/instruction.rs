@@ -173,6 +173,76 @@ pub enum LendingInstruction {
         /// Amount of loan to repay
         liquidity_amount: u64,
     },
+
+    /// Open/increase margin position
+    /// 
+    /// token_swap_pool	R
+    /// collateral_from_account	W
+    /// collateral_mint W
+    /// collateral_reserve W
+    /// collateral_supply_account W
+    /// collateral_fee_reciver W
+    /// `[writable]` borrow_reserve	W
+    /// `[writable]` Borrow reserve liquidity supply SPL Token account
+    /// `[writable]` position	W -> can be uninitialized
+    /// position_token_account	W -> destination (user account to recive position toknes)
+    /// position_mint	W
+    /// token_swap_authority	R
+    /// token_swap_from_account	W
+    /// token_swap_into_account	W
+    ///   15. token_swap_fee_account	W
+    ///   9. `[]` Lending market account.
+    ///   10 `[]` Derived lending market authority.
+    ///   11 `[]` User transfer authority ($authority).
+    ///   16 `[]` Clock sysvar
+    ///   17 `[]` Rent
+    ///   17 `[]` Token program id
+    ///   18 `[]` Token Swap program id
+    FundPosition {
+        /// amount of collateral or liquidity
+        amount: u64,
+
+        /// Describe how the amount should be treated
+        amount_type: BorrowAmountType,
+
+        /// leverage expressed as x1
+        leverage: u64,
+
+        /// min position amount out 
+        min_position_to_amount: u64,
+    },
+
+    /// close
+    ReducePosition {
+        /// amount of collateral or liquidity
+        amount: u64,
+
+        /// Describe how the amount should be treated
+        amount_type: BorrowAmountType,
+
+        /// leverage expressed as x1
+        leverage: u64,
+
+        /// min position amount out 
+        min_position_to_amount: u64,
+    },
+
+    /// liquidate position
+    LiquidatePosition {
+        /// amount of collateral or liquidity
+        amount: u64,
+
+        /// Describe how the amount should be treated
+        amount_type: BorrowAmountType,
+
+        /// leverage expressed as x1
+        leverage: u64,
+
+        /// min position amount out 
+        min_position_to_amount: u64,
+    },
+
+
 }
 
 impl LendingInstruction {
@@ -329,6 +399,33 @@ impl LendingInstruction {
             Self::LiquidateObligation { liquidity_amount } => {
                 buf.push(6);
                 buf.extend_from_slice(&liquidity_amount.to_le_bytes());
+            }
+            Self::FundPosition {
+                amount, amount_type, leverage, min_position_to_amount
+            } => {
+                buf.push(7);
+                buf.extend_from_slice(&amount.to_le_bytes());
+                buf.extend_from_slice(&amount_type.to_u8().unwrap().to_le_bytes());
+                buf.extend_from_slice(&leverage.to_le_bytes());
+                buf.extend_from_slice(&min_position_to_amount.to_le_bytes());
+            }
+            Self::ReducePosition {
+                amount, amount_type, leverage, min_position_to_amount
+            } => {
+                buf.push(8);
+                buf.extend_from_slice(&amount.to_le_bytes());
+                buf.extend_from_slice(&amount_type.to_u8().unwrap().to_le_bytes());
+                buf.extend_from_slice(&leverage.to_le_bytes());
+                buf.extend_from_slice(&min_position_to_amount.to_le_bytes());
+            }
+            Self::LiquidatePosition {
+                amount, amount_type, leverage, min_position_to_amount
+            } => {
+                buf.push(9);
+                buf.extend_from_slice(&amount.to_le_bytes());
+                buf.extend_from_slice(&amount_type.to_u8().unwrap().to_le_bytes());
+                buf.extend_from_slice(&leverage.to_le_bytes());
+                buf.extend_from_slice(&min_position_to_amount.to_le_bytes());
             }
         }
         buf

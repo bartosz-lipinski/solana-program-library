@@ -4,8 +4,10 @@ use crate::{
     dex_market::{DexMarket, TradeAction, TradeSimulator, BASE_MINT_OFFSET, QUOTE_MINT_OFFSET},
     error::LendingError,
     instruction::{BorrowAmountType, LendingInstruction},
+    
     math::{Decimal, Rate, WAD},
     state::{LendingMarket, Obligation, Reserve, ReserveConfig, ReserveState, PROGRAM_VERSION},
+    margin::{process_fund_position, process_reduce_position, process_liquidate_position}
 };
 use num_traits::FromPrimitive;
 use solana_program::{
@@ -63,6 +65,18 @@ pub fn process_instruction(
         LendingInstruction::LiquidateObligation { liquidity_amount } => {
             msg!("Instruction: Liquidate");
             process_liquidate(program_id, liquidity_amount, accounts)
+        }
+        LendingInstruction::FundPosition { amount, leverage, min_position_to_amount, amount_type  } => {
+            msg!("Instruction: FundPosition");
+            process_fund_position(program_id, amount, amount_type, leverage, min_position_to_amount, accounts)
+        }
+        LendingInstruction::ReducePosition { amount, leverage, min_position_to_amount, amount_type  } => {
+            msg!("Instruction: FundPosition");
+            process_fund_position(program_id, amount, amount_type, leverage, min_position_to_amount, accounts)
+        }
+        LendingInstruction::LiquidatePosition { amount, leverage, min_position_to_amount, amount_type  } => {
+            msg!("Instruction: FundPosition");
+            process_fund_position(program_id, amount, amount_type, leverage, min_position_to_amount, accounts)
         }
     }
 }
@@ -1114,7 +1128,7 @@ fn unpack_mint(data: &[u8]) -> Result<spl_token::state::Mint, LendingError> {
 
 /// Issue a spl_token `InitializeMint` instruction.
 #[inline(always)]
-fn spl_token_init_mint(params: TokenInitializeMintParams<'_, '_>) -> ProgramResult {
+pub fn spl_token_init_mint(params: TokenInitializeMintParams<'_, '_>) -> ProgramResult {
     let TokenInitializeMintParams {
         mint,
         rent,
@@ -1230,12 +1244,18 @@ fn spl_token_burn(params: TokenBurnParams<'_, '_>) -> ProgramResult {
     result.map_err(|_| LendingError::TokenBurnFailed.into())
 }
 
-struct TokenInitializeMintParams<'a: 'b, 'b> {
-    mint: AccountInfo<'a>,
-    rent: AccountInfo<'a>,
-    authority: &'b Pubkey,
-    decimals: u8,
-    token_program: AccountInfo<'a>,
+/// Initalize token mint params
+pub struct TokenInitializeMintParams<'a: 'b, 'b> {
+    /// mint
+    pub mint: AccountInfo<'a>,
+    /// rent
+    pub rent: AccountInfo<'a>,
+    /// authority
+    pub authority: &'b Pubkey,
+    /// decimals
+    pub decimals: u8,
+    /// token_program
+    pub token_program: AccountInfo<'a>,
 }
 
 struct TokenInitializeAccountParams<'a> {

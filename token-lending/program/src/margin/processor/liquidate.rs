@@ -33,5 +33,7 @@ pub fn process_liquidate_position(
         return Err(LendingError::InvalidAmount.into());
     }
 
+    unimplemented!();
+
     Ok(())
 }

@@ -100,6 +100,9 @@ pub enum LendingError {
     /// Token burn failed
     #[error("Token burn failed")]
     TokenBurnFailed,
+    /// Token swap failed
+    #[error("Token swap failed")]
+    TokenSwapFailed,
 }
 
 impl From<LendingError> for ProgramError {
